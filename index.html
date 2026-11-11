@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="案源">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.png">
+<title>案源隨身</title>
+<style>
+:root{
+  --bg:#f4f6f9; --surface:#fff; --surface-2:#f8f9fb; --ink:#17202b; --ink-2:#3a4655; --muted:#6c7787;
+  --line:#e2e6ec; --line-2:#eef1f5; --accent:#1f3a5f; --accent-soft:#e8eef6; --warn:#c9821a; --ok:#2e8b6a; --bad:#c2453d;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e131a; --surface:#151c25; --surface-2:#1a222d; --ink:#e6ebf1; --ink-2:#c3ccd7; --muted:#8e9aaa;
+    --line:#26313f; --line-2:#1f2935; --accent:#9db8de; --accent-soft:#1e2a3a; --warn:#e3a440; --ok:#4cb38c; --bad:#e0675f;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e131a; --surface:#151c25; --surface-2:#1a222d; --ink:#e6ebf1; --ink-2:#c3ccd7; --muted:#8e9aaa;
+  --line:#26313f; --line-2:#1f2935; --accent:#9db8de; --accent-soft:#1e2a3a; --warn:#e3a440; --ok:#4cb38c; --bad:#e0675f;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%}
+a{color:var(--accent)}
+button{font:inherit;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+.hidden{display:none!important}
+
+/* 登入 */
+.login{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.login form{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 20px}
+.login h1{font-size:20px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+.login p{color:var(--muted);font-size:13px;margin:0 0 18px}
+.login input{width:100%;height:46px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--ink);font:inherit;font-size:16px;padding:0 12px}
+.login .pbtn{width:100%;height:46px;margin-top:12px;border:0;border-radius:10px;background:var(--accent);color:var(--surface);font-weight:600;font-size:16px}
+.login .err{color:var(--bad);font-size:13px;min-height:20px;margin-top:10px}
+.logo{width:30px;height:30px;border-radius:8px;flex:0 0 auto}
+
+/* 主畫面 */
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(10px + env(safe-area-inset-top)) 16px 8px;border-bottom:1px solid var(--line-2)}
+.hrow{display:flex;align-items:center;gap:10px}
+.hrow h1{font-size:17px;margin:0;flex:1;min-width:0;display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hrow .logo{width:26px;height:26px}
+.ibtn{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;justify-content:center;font-size:16px;flex:0 0 auto;cursor:pointer}
+.stamp{font-size:11.5px;color:var(--muted);margin-top:2px}
+.stamp.stale{color:var(--warn)}
+.sbox{margin-top:8px;position:relative}
+.sbox input{width:100%;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font:inherit;font-size:16px;padding:0 40px 0 14px}
+.sbox input:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+.sbox .x{position:absolute;right:6px;top:6px;width:32px;height:32px;border:0;background:transparent;color:var(--muted);font-size:18px}
+.tabs{display:flex;gap:6px;margin-top:8px}
+.tabs button{flex:1;height:36px;border:1px solid var(--line);background:var(--surface);border-radius:10px;font-size:14px;color:var(--ink-2)}
+.tabs button.on{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:600}
+main{padding:12px 16px calc(40px + env(safe-area-inset-bottom));max-width:760px;margin:0 auto}
+.hint{color:var(--muted);font-size:13px;margin:4px 2px 10px}
+.empty{color:var(--muted);text-align:center;padding:40px 10px;font-size:14px}
+
+/* 公司列表 */
+.co{display:block;width:100%;text-align:left;text-decoration:none;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin-bottom:8px;cursor:pointer}
+.co b{font-size:15.5px;font-weight:600}
+.co .al{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.co .ic{display:flex;gap:12px;margin-top:4px;font-size:12.5px;color:var(--ink-2)}
+.co .ic .dim{color:var(--muted);opacity:.55}
+.more{display:block;width:100%;height:42px;border:1px dashed var(--line);border-radius:12px;background:transparent;color:var(--accent);margin-top:4px}
+
+/* 名片 */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.card .nm{font-weight:600;font-size:15.5px}
+.card .tt{color:var(--ink-2);font-size:13px}
+.card .cn{color:var(--muted);font-size:12.5px;margin-top:2px}
+.card .cn a{text-decoration:none;font-weight:600}
+.card .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.card .acts a{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:6px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);text-decoration:none;font-size:14px;max-width:100%;word-break:break-all}
+.card .acts a.call{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:600}
+.card .note{font-size:12.5px;color:var(--muted);margin-top:8px;white-space:pre-wrap}
+
+/* 公司頁 */
+.dhead{display:flex;align-items:flex-start;gap:10px;margin:2px 0 10px}
+.dhead h2{font-size:20px;margin:0;line-height:1.3;flex:1;min-width:0;word-break:break-word}
+.dhead .al{color:var(--muted);font-size:12.5px;margin-top:2px}
+.dtabs{display:flex;gap:6px;margin-bottom:12px;position:sticky;top:var(--hh,0px);z-index:4;background:var(--bg);padding:6px 0}
+.dtabs button{flex:1;height:38px;border:1px solid var(--line);background:var(--surface);border-radius:10px;font-size:14px;color:var(--ink-2)}
+.dtabs button.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700}
+.dtabs button:disabled{opacity:.4}
+.paper{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 16px 10px;margin-bottom:12px}
+.p-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.p-head h3{margin:0;font-size:16px}
+.p-head .dt{color:var(--muted);font-size:12.5px;white-space:nowrap}
+.p-meta{display:flex;flex-wrap:wrap;gap:4px 12px;color:var(--muted);font-size:12.5px;margin-top:6px}
+.p-tag{color:var(--ink-2);font-size:13.5px;margin-top:6px}
+.p-sec{margin-top:16px}
+.p-sec h4{margin:0 0 6px;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.p-sec h4 .n{width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:12px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+.p-sec.hl{background:color-mix(in srgb,var(--warn) 9%,transparent);border-radius:10px;padding:10px 10px 4px;margin-left:-6px;margin-right:-6px}
+.p-sec.prev{opacity:.75;border-top:1px dashed var(--line);padding-top:10px}
+.p-sec ul{margin:0;padding-left:18px}
+.p-sec li{margin:3px 0;color:var(--ink-2);font-size:14.5px}
+.p-sec li.plain{list-style:none;margin-left:-18px}
+.p-sec li.d1{margin-left:14px;list-style:circle;font-size:14px}
+.p-sec li.d2{margin-left:28px;list-style:square;font-size:13.5px}
+.p-sec li.numd{list-style:none;margin-left:-18px}
+.p-sec li.numd .mk{font-weight:700;margin-right:6px;color:var(--ink)}
+.fig{font-weight:700;color:var(--ink);background:color-mix(in srgb,var(--accent) 10%,transparent);border-radius:3px;padding:0 2px}
+.tblw{list-style:none;margin-left:-18px!important}
+.tbl{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:8px;margin:6px 0}
+.tbl table{border-collapse:collapse;font-size:13px;min-width:100%}
+.tbl th,.tbl td{border-bottom:1px solid var(--line-2);padding:6px 8px;text-align:left;vertical-align:top;white-space:nowrap}
+.tbl th{background:var(--surface-2);font-weight:600}
+.sum{margin:0 0 8px;color:var(--ink);font-size:14.5px}
+.badge{font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.comp{border:1px solid var(--line-2);border-radius:10px;padding:9px 11px;margin:6px 0;background:var(--surface-2)}
+.comp b{font-size:14.5px}
+.comp .st{font-size:12px;color:var(--muted);margin-left:6px}
+.comp div{font-size:13.5px;color:var(--ink-2);margin-top:2px}
+.src{margin-top:8px;display:flex;flex-direction:column;gap:3px;font-size:12.5px}
+.src summary{color:var(--muted);cursor:pointer}
+.src a{display:block;padding:3px 0;word-break:break-all}
+.eli{background:color-mix(in srgb,var(--ok) 8%,var(--surface));border:1px solid color-mix(in srgb,var(--ok) 30%,transparent);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.eli h4{margin:0 0 6px;font-size:15px}
+.eli .one{font-size:16px;font-weight:600;margin:0 0 8px}
+.eli .ana{font-size:14px;color:var(--ink-2);margin:0 0 8px}
+.eli .lb{font-size:12px;font-weight:700;color:var(--muted);margin:10px 0 4px;letter-spacing:.04em}
+.eli ol{margin:0;padding-left:20px;font-size:14px;color:var(--ink-2)}
+.eli ol b{color:var(--ink)}
+.eli .gu{font-size:13px;color:var(--muted);margin-top:10px}
+.warn{background:color-mix(in srgb,var(--bad) 10%,transparent);color:var(--bad);border-radius:10px;padding:8px 10px;font-size:13px;margin:8px 0}
+.mtabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px}
+.mtabs button{flex:0 0 auto;height:32px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:13px;color:var(--ink-2)}
+.mtabs button.on{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:600}
+.foot{font-size:11.5px;color:var(--muted);margin:6px 2px 16px}
+.sheet{position:fixed;inset:0;background:rgba(10,15,25,.4);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet .in{width:100%;max-width:520px;background:var(--surface);border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+.sheet .in button{display:block;width:100%;height:46px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);margin-top:8px;font-size:15px}
+.sheet .in button.bad{color:var(--bad)}
+.sheet .in p{font-size:13px;color:var(--muted);margin:0 0 6px}
+
+/* Deal Pipeline 拜訪查詢 */
+.pl{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 10px}
+.pl-h{font-size:14px}.pl-h b{font-size:15px;margin-right:6px}
+.pl-yes{color:var(--ok)}.pl-no{color:var(--muted)}
+.pl-s{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.pl-r{border-top:1px solid var(--line-2);margin-top:10px;padding-top:8px}
+.pl-r .nm{font-weight:700;font-size:14px}.pl-r .al{color:var(--muted);font-size:12px}
+.pl-v{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:4px}
+.pl-v span{white-space:nowrap;padding:1px 8px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);font-size:12.5px}
+.pl-v span.me{border-color:var(--accent);color:var(--accent)}
+.pl-v span.dl{border-style:dashed;color:var(--muted)}
+.pl-dl{color:var(--warn)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const LOGO = '<svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--accent)"/><path d="M8 10.5h12M11 16h10M14 21.5h4" stroke="var(--surface)" stroke-width="3" stroke-linecap="round"/><circle cx="24" cy="10.5" r="3" fill="#e3a440"/></svg>';
+const KEY = "dpm-key", ITER = 600000;
+const ls = {get: k => { try { return localStorage.getItem(k); } catch(_) { return null; } },
+            set: (k, v) => { try { localStorage.setItem(k, v); } catch(_){} },
+            del: k => { try { localStorage.removeItem(k); } catch(_){} }};
+const b64 = u8 => btoa(String.fromCharCode(...u8));
+const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js").catch(() => {});
+
+let BLOB = null, D = null;
+
+async function loadBlob(){
+  const r = await fetch("data.enc", {cache: "no-cache"});
+  if (!r.ok) throw new Error("讀不到資料（" + r.status + "）");
+  return new Uint8Array(await r.arrayBuffer());
+}
+async function decryptWith(key, blob){
+  if (String.fromCharCode(...blob.slice(0, 4)) !== "DPM1") throw new Error("資料格式不符");
+  const iv = blob.slice(20, 32), ct = blob.slice(32);
+  const plain = await crypto.subtle.decrypt({name: "AES-GCM", iv}, key, ct);
+  const ds = new Blob([plain]).stream().pipeThrough(new DecompressionStream("deflate"));
+  return JSON.parse(await new Response(ds).text());
+}
+async function keyFromPassword(pw, salt){
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({name: "PBKDF2", hash: "SHA-256", salt, iterations: ITER}, base, {name: "AES-GCM", length: 256}, true, ["decrypt"]);
+}
+const importRaw = raw => crypto.subtle.importKey("raw", raw, {name: "AES-GCM"}, true, ["decrypt"]);
+
+function showLogin(msg){
+  $("#app").innerHTML = `<div class="login"><form id="lf" autocomplete="on">
+    <h1>${LOGO}案源隨身</h1><p>產業分析、Call memo、名片聯絡人（唯讀）。輸入一次密碼，之後這支手機免輸入、離線也能看。</p>
+    <input type="text" name="username" value="dashboard" autocomplete="username" hidden>
+    <input id="pw" type="password" autocomplete="current-password" placeholder="密碼" required>
+    <button class="pbtn" id="go">開啟</button><div class="err" id="err">${esc(msg || "")}</div></form></div>`;
+  $("#lf").onsubmit = async e => {
+    e.preventDefault();
+    const pw = $("#pw").value; if (!pw) return;
+    $("#go").disabled = true; $("#go").textContent = "解密中…"; $("#err").textContent = "";
+    try {
+      BLOB = BLOB || await loadBlob();
+      const key = await keyFromPassword(pw, BLOB.slice(4, 20));
+      D = await decryptWith(key, BLOB);
+      ls.set(KEY, b64(new Uint8Array(await crypto.subtle.exportKey("raw", key))));
+      start();
+    } catch(err) {
+      $("#err").textContent = err && err.name === "OperationError" ? "密碼不對，請再試一次。" : "無法開啟：" + (err.message || err);
+      $("#go").disabled = false; $("#go").textContent = "開啟";
+    }
+  };
+  setTimeout(() => { const p = $("#pw"); if (p) p.focus(); }, 50);
+}
+
+async function boot(){
+  $("#app").innerHTML = `<div class="empty">讀取中…</div>`;
+  try { BLOB = await loadBlob(); } catch(e) { $("#app").innerHTML = `<div class="empty">${esc(e.message)}<br>請確認網路，或稍後再試。</div>`; return; }
+  const k = ls.get(KEY);
+  if (!k) return showLogin();
+  try { D = await decryptWith(await importRaw(unb64(k)), BLOB); start(); }
+  catch(_) { ls.del(KEY); showLogin("資料已更換密碼，請重新輸入。"); }
+}
+
+/* ---------- 資料整理 ---------- */
+let CO = [], BYN = {}, CARDS = [], CARDS_BY = {};
+const normD = s => { const m = String(s || "").match(/(\d{4})[-./](\d{1,2})[-./](\d{1,2})/); return m ? `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}` : ""; };
+const memoDate = id => normD((D.memos[id] || {}).dt);
+function prep(){
+  PL = null;
+  CO = D.companies; BYN = Object.fromEntries(CO.map(c => [c.n, c]));
+  CARDS = D.contacts.map((k, i) => ({...k, i, hay: [k.n, k.t, k.co, k.e, k.m, k.p].join(" ").toLowerCase()}));
+  CARDS_BY = {}; CARDS.forEach(k => { if (k.to) (CARDS_BY[k.to] ??= []).push(k); });
+  CO.forEach(c => {
+    c.last = [...c.m.map(memoDate), normD((D.industry[c.n] || {}).created)].filter(Boolean).sort().at(-1) || "";
+    c.hay = [c.n, ...c.a, ...c.d, ...(CARDS_BY[c.n] || []).flatMap(k => [k.n, k.e])].join(" ").toLowerCase();
+  });
+  CO.sort((a, b) => (b.last || "").localeCompare(a.last || "") || a.n.localeCompare(b.n, "zh-Hant"));
+}
+
+/* ---------- 畫面 ---------- */
+const S = {tab: "co", q: "", n: 40};
+try { const t = ls.get("dpm-tab"); if (t === "co" || t === "pp") S.tab = t; } catch(_){}
+function start(){
+  prep();
+  const at = D.generatedAt ? new Date(D.generatedAt) : null;
+  const age = at ? (Date.now() - at) / 864e5 : 0;
+  $("#app").innerHTML = `<header class="top" id="hdr">
+      <div class="hrow"><h1>${LOGO}<span id="ttl">案源隨身</span></h1><button class="ibtn hidden" id="back" aria-label="返回">←</button><button class="ibtn" id="menu" aria-label="選單">⋯</button></div>
+      <div class="stamp${age > 7 ? " stale" : ""}">資料更新：${at ? fmt(at, true) : "—"}${age > 7 ? `（${Math.floor(age)} 天前）` : ""}</div>
+      <div id="listTop"><div class="sbox"><input id="q" type="search" placeholder="搜尋公司、別名、人名、Email、電話…" value="${esc(S.q)}" autocomplete="off" enterkeyhint="search"><button class="x hidden" id="qx" aria-label="清除">×</button></div>
+      <div class="tabs"><button data-t="co">公司 <span class="num">${CO.length}</span></button><button data-t="pp">聯絡人 <span class="num">${CARDS.length}</span></button></div></div>
+    </header><main id="main"></main>`;
+  $("#q").addEventListener("input", e => { S.q = e.target.value; S.n = 40; $("#qx").classList.toggle("hidden", !S.q); renderList(); });
+  $("#qx").onclick = () => { S.q = ""; $("#q").value = ""; $("#qx").classList.add("hidden"); S.n = 40; renderList(); $("#q").focus(); };
+  $("#qx").classList.toggle("hidden", !S.q);
+  document.querySelectorAll("[data-t]").forEach(b => b.onclick = () => { S.tab = b.dataset.t; S.n = 40; ls.set("dpm-tab", S.tab); renderList(); });
+  $("#back").onclick = () => { if (fromList) history.back(); else location.hash = ""; };
+  $("#menu").onclick = openMenu;
+  onhashchange = route;
+  route();
+  checkUpdate();
+}
+function fmt(d, time){ const p = n => String(n).padStart(2, "0"); return `${d.getFullYear()}/${p(d.getMonth() + 1)}/${p(d.getDate())}${time ? ` ${p(d.getHours())}:${p(d.getMinutes())}` : ""}`; }
+const fmtS = s => normD(s).replace(/-/g, "/");
+function setHH(){ const h = $("#hdr"); if (h) document.documentElement.style.setProperty("--hh", h.offsetHeight + "px"); }
+
+let fromList = false, onList = false;
+function route(){
+  const m = location.hash.match(/^#\/co\/([^/]+)(?:\/(ind|memo|pp))?(?:\/([0-9a-f]{12}))?$/);
+  if (m) { let n = ""; try { n = decodeURIComponent(m[1]); } catch(_){} if (BYN[n]) { if (onList) fromList = true; onList = false; return renderCompany(BYN[n], m[2], m[3]); } }
+  onList = true; fromList = false;
+  $("#listTop").classList.remove("hidden"); $("#back").classList.add("hidden"); $("#ttl").textContent = "案源隨身";
+  renderList(); setHH();
+}
+
+function words(){ return S.q.trim().toLowerCase().split(/\s+/).filter(Boolean); }
+function renderList(){
+  const main = $("#main"); if (!main) return;
+  document.querySelectorAll("[data-t]").forEach(b => b.classList.toggle("on", b.dataset.t === S.tab));
+  const ws = words(), digits = S.q.replace(/\D/g, "");
+  const hit = h => ws.every(w => h.includes(w)) || (digits.length >= 4 && h.replace(/\D/g, "").includes(digits));
+  let html = "";
+  if (S.tab === "co") {
+    const rows = ws.length ? CO.filter(c => hit(c.hay)) : CO;
+    if (ws.length) html += pipeHTML(S.q.trim());
+    if (!ws.length) html += `<div class="hint">依最近 memo／產業分析排序。點公司看產業分析、Call memo、聯絡人。</div>`;
+    html += rows.length ? rows.slice(0, S.n).map(coHTML).join("") : `<div class="empty">找不到「${esc(S.q)}」<br>試試中文／英文名、網域，或切到「聯絡人」。</div>`;
+    if (rows.length > S.n) html += `<button class="more" id="more">再顯示 ${Math.min(40, rows.length - S.n)} 家（共 ${rows.length}）</button>`;
+  } else {
+    const rows = ws.length ? CARDS.filter(k => hit(k.hay)) : CARDS;
+    if (!ws.length) html += `<div class="hint">輸入姓名、公司、Email 或電話末幾碼。點電話直接撥打、地址開地圖。</div>`;
+    html += rows.length ? rows.slice(0, S.n).map(k => cardHTML(k, true)).join("") : `<div class="empty">找不到「${esc(S.q)}」</div>`;
+    if (rows.length > S.n) html += `<button class="more" id="more">再顯示 ${Math.min(40, rows.length - S.n)} 位（共 ${rows.length}）</button>`;
+  }
+  main.innerHTML = html;
+  const mo = $("#more"); if (mo) mo.onclick = () => { S.n += 40; renderList(); };
+}
+/* ---------- Deal Pipeline 拜訪查詢：所有 AO，輸入公司名就知道有沒有被拜訪過 ---------- */
+const PL_SUF = ["股份有限公司", "有限公司", "公司", "(股)", "（股）"];
+const plNorm = s => { s = String(s || "").replace(/[（(][^)）]*[)）]/g, ""); PL_SUF.forEach(x => { s = s.split(x).join(""); }); return s.replace(/[\s\-_·•．.,，、:：/|【】\[\]「」]+/g, "").toLowerCase(); };
+let PL = null;
+function plList(){
+  if (!PL) PL = (D.pipe || []).map(([name, n, c, al, v]) => ({name, n, c, al, v, aln: al.map(plNorm).filter(Boolean)}));
+  return PL;
+}
+function plMatch(e, q){
+  const hit = n => n && (n.includes(q) || (n.length >= 3 && q.includes(n)));
+  return hit(e.n) || (e.c && e.c.length >= 3 && q.includes(e.c)) || e.aln.some(hit);
+}
+function pipeHTML(raw){
+  const L = plList(), q = plNorm(raw);
+  if (!L.length || !q || /^[a-z0-9]$/.test(q)) return "";
+  const hits = L.filter(e => plMatch(e, q));
+  const latest = L.reduce((m, e) => e.v.length && e.v[0][0] > m ? e.v[0][0] : m, "");
+  if (!hits.length) return `<div class="pl"><div class="pl-h"><b class="pl-no">✕ 沒有拜訪紀錄</b>Deal Pipeline 查無「${esc(raw)}」<span class="pl-s">共 ${L.length} 家、所有 AO；資料至 ${esc(latest)}。可試簡稱或英文名。</span></div></div>`;
+  const total = hits.reduce((n, e) => n + e.v.filter(x => !x[3]).length, 0), me = String(D.me || "").toLowerCase();
+  const dlN = hits.reduce((n, e) => n + e.v.filter(x => x[3]).length, 0);
+  const rows = hits.slice(0, 15).map(e => `<div class="pl-r"><div class="nm">${esc(e.name)}</div>${e.al.length ? `<div class="al">${esc(e.al.join("、"))}</div>` : ""}<div class="pl-v">${e.v.slice(0, 8).map(([d, ao, ap, dl]) => dl ? `<span class="dl">Deal Log ${esc(d.replace(/-/g, "/"))}・PM ${esc(ao || "未填")}</span>` : `<span class="${me && ao.toLowerCase().includes(me) ? "me" : ""}">${esc(d.replace(/-/g, "/"))}${ap ? " " + esc(ap) : ""}・${esc(ao || "AO 未填")}</span>`).join("")}${e.v.length > 8 ? `<span>…另 ${e.v.length - 8} 次</span>` : ""}</div></div>`).join("");
+  const head = total ? `<b class="pl-yes">✓ 已拜訪過</b>${hits.length} 家相符・共 ${total} 次${dlN ? `・Deal Log ${dlN} 筆` : ""}` : `<b class="pl-dl">◐ 有案子登錄、沒有約訪紀錄</b>只在 Deal Log List`;
+  return `<div class="pl"><div class="pl-h">${head}<span class="pl-s">Deal Pipeline 所有 AO；Deal Log 日期為 BP Code 推估；資料至 ${esc(latest)}${hits.length > 15 ? "；只列前 15 家，請輸入更完整的名稱" : ""}</span></div>${rows}</div>`;
+}
+function coHTML(c){
+  const ind = D.industry[c.n], nk = (CARDS_BY[c.n] || []).length;
+  const dim = t => `<span class="dim">${t}</span>`;
+  return `<a class="co" href="#/co/${encodeURIComponent(c.n)}">
+    <b>${esc(c.n)}</b>${c.a.length ? `<div class="al">${esc(c.a.slice(0, 3).join("、"))}</div>` : ""}
+    <div class="ic num">${ind ? `<span>🔬 ${fmtS(ind.created)}</span>` : dim("🔬 —")}${c.m.length ? `<span>📄 ${c.m.length} 份・${fmtS(memoDate(c.m[0]))}</span>` : dim("📄 —")}${nk ? `<span>👤 ${nk}</span>` : dim("👤 —")}</div></a>`;
+}
+const telOf = s => String(s || "").replace(/\s*(#|ext\.?|分機|轉)\s*/gi, ",").replace(/[^\d+*,]/g, "");
+function phones(s){ return String(s || "").split(/[\/;、,，]|\s{2,}|\n/).map(x => x.trim()).filter(x => telOf(x).replace(/\D/g, "").length >= 6); }
+function cardHTML(k, showCo){
+  const acts = [];
+  phones(k.m).forEach(x => acts.push(`<a class="call" href="tel:${esc(telOf(x))}">📱 ${esc(x)}</a>`));
+  phones(k.p).forEach(x => acts.push(`<a href="tel:${esc(telOf(x))}">☎ ${esc(x)}</a>`));
+  String(k.e || "").split(/[\s;,／/]+/).filter(x => x.includes("@")).forEach(x => acts.push(`<a href="mailto:${esc(x)}">✉ ${esc(x)}</a>`));
+  if (k.a) acts.push(`<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(k.a)}" target="_blank" rel="noopener noreferrer">📍 ${esc(k.a)}</a>`);
+  if (k.w) { const u = /^https?:\/\//i.test(k.w) ? k.w : "https://" + k.w; acts.push(`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">🌐 ${esc(k.w.replace(/^https?:\/\//i, ""))}</a>`); }
+  const coLine = showCo && (k.co || k.to) ? `<div class="cn">${k.to && BYN[k.to] ? `<a href="#/co/${encodeURIComponent(k.to)}">${esc(k.to)} →</a>${k.co && k.co !== k.to ? "　" + esc(k.co) : ""}` : esc(k.co || k.to)}</div>` : (k.co && !showCo ? `<div class="cn">${esc(k.co)}</div>` : "");
+  return `<div class="card"><div class="nm">${esc(k.n || "（未記姓名）")}</div>${k.t ? `<div class="tt">${esc(k.t)}</div>` : ""}${coLine}
+    ${acts.length ? `<div class="acts">${acts.join("")}</div>` : ""}${k.note ? `<div class="note">${esc(k.note)}</div>` : ""}</div>`;
+}
+
+/* ---------- 公司頁 ---------- */
+function renderCompany(c, tab, memoId){
+  const ind = D.industry[c.n], cards = CARDS_BY[c.n] || [];
+  const has = {ind: !!ind, memo: c.m.length > 0, pp: cards.length > 0};
+  if (!tab || !has[tab]) tab = has.ind ? "ind" : has.memo ? "memo" : "pp";
+  $("#listTop").classList.add("hidden"); $("#back").classList.remove("hidden"); $("#ttl").textContent = c.n;
+  setHH();
+  const t = (k, label, n) => `<button data-dt="${k}" class="${tab === k ? "on" : ""}"${has[k] ? "" : " disabled"}>${label}${n ? ` <span class="num">${n}</span>` : ""}</button>`;
+  let body = "";
+  if (tab === "ind") body = indHTML(c, ind);
+  else if (tab === "memo") body = memoHTML(c, memoId);
+  else body = cards.map(k => cardHTML(k, false)).join("");
+  $("#main").innerHTML = `<div class="dhead"><div style="flex:1;min-width:0"><h2>${esc(c.n)}</h2>${c.a.length ? `<div class="al">${esc(c.a.join("、"))}</div>` : ""}${c.d.length ? `<div class="al">${esc(c.d.join("、"))}</div>` : ""}</div></div>
+    <div class="dtabs">${t("ind", "產業分析")}${t("memo", "Call memo", c.m.length)}${t("pp", "聯絡人", cards.length)}</div>${body}`;
+  document.querySelectorAll("[data-dt]").forEach(b => b.onclick = () => { history.replaceState(null, "", `#/co/${encodeURIComponent(c.n)}/${b.dataset.dt}`); renderCompany(c, b.dataset.dt); scrollTo(0, 0); });
+  document.querySelectorAll("[data-mid]").forEach(b => b.onclick = () => { history.replaceState(null, "", `#/co/${encodeURIComponent(c.n)}/memo/${b.dataset.mid}`); renderCompany(c, "memo", b.dataset.mid); scrollTo(0, 0); });
+}
+
+const FIG = /((?:NTD?|US|USD|RMB|HK)?\$\s?[\d][\d,.]*\s?(?:億|千萬|百萬|萬|[mMbBkK](?![a-zA-Z]))?(?:元)?|[\d][\d,.]*\s?(?:億元|萬元|億|萬)(?:美元)?|\d+(?:\.\d+)?\s?%)/g;
+const fmtTxt = t => esc(t).replace(FIG, '<span class="fig">$1</span>');
+const HL = /後續|追蹤|comment|conclusion|結論|建議|評估|recommend/i;
+const safeUrl = u => /^https?:\/\//i.test(String(u || "")) ? String(u) : "";
+
+function srcHTML(list){
+  const ok = (list || []).filter(s => safeUrl(s.url));
+  return ok.length ? `<details class="src"><summary>來源 ${ok.length} 筆</summary>${ok.map((s, i) => `<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${i + 1}. ${esc((s.title || s.url).slice(0, 80))}</a>`).join("")}</details>` : "";
+}
+function eliHTML(e){
+  if (!e) return "";
+  const steps = (e.flow && e.flow.steps) || [], nodes = (e.money && e.money.nodes) || [];
+  const cmp = e.compare && e.compare.show && (e.compare.items || []).length >= 3 ? e.compare : null;
+  return `<section class="eli"><h4>💡 白話版</h4>
+    ${e.oneliner ? `<p class="one">${esc(e.oneliner)}</p>` : ""}${e.analogy ? `<p class="ana">${esc(e.analogy)}</p>` : ""}
+    ${steps.length ? `<div class="lb">它怎麼運作</div><ol>${steps.map(s => `<li><b>${esc(s.title)}</b>　${esc(s.note)}</li>`).join("")}</ol>` : ""}
+    ${nodes.length ? `<div class="lb">誰付錢給誰</div><ol>${nodes.map(s => `<li><b>${esc(s.title)}</b>　${esc(s.note)}</li>`).join("")}</ol>${e.money.caption ? `<p class="ana" style="margin-top:6px">${esc(e.money.caption)}</p>` : ""}` : ""}
+    ${cmp ? `<div class="lb">跟對手比：${esc(cmp.metric)}${cmp.lowerIsBetter ? "（越小越好）" : "（越大越好）"}</div><ol>${cmp.items.map(i => `<li>${i.self ? "<b>" : ""}${esc(i.name)}：${esc(i.value)} ${esc(cmp.unit)}${i.self ? "</b>" : ""}</li>`).join("")}</ol>` : ""}
+    ${e.grownup ? `<div class="gu"><b>大人版補充：</b>${esc(e.grownup)}</div>` : ""}</section>`;
+}
+const IND_SECS = [["principle", "技術／產品原理"], ["competitors", "競爭對手"], ["market", "市場"], ["background", "公司背景調查"]];
+function indHTML(c, v){
+  const d = v.data || {}, co = d.company || {};
+  const web = safeUrl(co.website);
+  const secs = IND_SECS.map(([k, label], i) => {
+    const s = d[k] || {status: "insufficient"}, insuf = s.status !== "ok";
+    let inner = "";
+    if (k === "competitors" && (s.items || []).length) inner = s.items.map(it => `<div class="comp"><b>${esc(it.name)}</b><span class="st">${esc(it.stage)}</span><div>${esc(it.product)}</div><div style="color:var(--muted)">差異：${esc(it.difference)}</div></div>`).join("");
+    else if ((s.points || []).length) inner = `<ul>${s.points.map(p => `<li>${fmtTxt(p)}</li>`).join("")}</ul>`;
+    return `<section class="p-sec"><h4><span class="n">${i + 1}</span>${label}${insuf ? '<span class="badge">資訊量不足</span>' : ""}</h4>
+      ${s.summary && !(insuf && s.summary === "資訊量不足") ? `<p class="sum">${fmtTxt(s.summary)}</p>` : ""}${inner}${srcHTML(s.sources)}</section>`;
+  }).join("");
+  return `${eliHTML(v.eli5)}<article class="paper">
+    <div class="p-head"><h3>${esc(co.name || c.n)}</h3><div class="dt num">${fmtS(v.created)}</div></div>
+    <div class="p-meta">${web ? `<span><a href="${esc(web)}" target="_blank" rel="noopener noreferrer">${esc(web.replace(/^https?:\/\//, "").replace(/\/$/, ""))}</a></span>` : ""}<span>辨識可信度：${esc(co.confidence || "—")}</span></div>
+    ${co.confidence === "低" ? `<div class="warn">⚠ AI 不確定是否找對公司，請先確認。</div>` : ""}
+    ${secs}</article><div class="foot">${esc(v.by || "")}・AI 產生內容，引用前請點來源查核</div>`;
+}
+function memoItem([d, t, k]){
+  if (k === 2) {
+    const rows = t || [];
+    return `<li class="tblw"><div class="tbl"><table>${rows.map((r, i) => `<tr>${r.map((x, j) => i === 0 || j === 0 ? `<th>${esc(x)}</th>` : `<td class="num">${esc(x)}</td>`).join("")}</tr>`).join("")}</table></div></li>`;
+  }
+  if (k === 3) { const m = String(t).match(/^(\S+)\s(.*)$/s); return `<li class="numd d${d}"><span class="mk">${esc(m ? m[1] : "")}</span>${fmtTxt(m ? m[2] : t)}</li>`; }
+  return `<li class="${k === 1 ? "d" + d : "plain"}">${fmtTxt(t)}</li>`;
+}
+function memoHTML(c, memoId){
+  const id = c.m.includes(memoId) ? memoId : c.m[0];
+  const doc = D.memos[id]; if (!doc) return `<div class="empty">找不到這份 memo</div>`;
+  const tabs = c.m.length > 1 ? `<div class="mtabs">${c.m.map(x => `<button data-mid="${x}" class="${x === id ? "on" : ""}">${esc(fmtS(memoDate(x)) || "未標日期")}${/update/i.test((D.memos[x] || {}).f || "") ? "・更新" : ""}</button>`).join("")}</div>` : "";
+  const secs = doc.s || [];
+  let num = 0, seenPrev = false;
+  return tabs + `<article class="paper">
+    <div class="p-head"><h3>${esc(doc.t || c.n)}</h3><div class="dt num">${esc(doc.dt)}</div></div>
+    ${doc.tag ? `<div class="p-tag">${esc(doc.tag)}</div>` : ""}
+    ${(doc.meta || []).length ? `<div class="p-meta">${doc.meta.map(x => `<span>${esc(x)}</span>`).join("")}</div>` : ""}
+    ${secs.length ? secs.map(s => { if (s.prev) seenPrev = true, num = 0; else num++; return `<section class="p-sec${s.prev ? " prev" : HL.test(s.h) ? " hl" : ""}"><h4>${s.prev ? "" : `<span class="n">${num}</span>`}${esc(s.h)}</h4><ul>${(s.items || []).map(memoItem).join("")}</ul></section>`; }).join("") : `<div class="empty">這份 memo 的格式無法自動分段，請用電腦看原始檔。</div>`}
+  </article><div class="foot">${esc(doc.f)}・閱讀版由原始檔自動整理，數字以原始檔為準</div>`;
+}
+
+/* ---------- 選單、更新檢查 ---------- */
+function openMenu(){
+  const el = document.createElement("div");
+  el.className = "sheet";
+  el.innerHTML = `<div class="in"><p>資料由電腦上的案源管理 Dashboard 加密發布；這裡只能看，不能修改。</p>
+    <button id="mRe">重新下載資料</button><button id="mOut" class="bad">登出（清除這支手機上的金鑰）</button><button id="mX">關閉</button></div>`;
+  document.body.appendChild(el);
+  el.onclick = async e => {
+    if (e.target === el || e.target.id === "mX") return el.remove();
+    if (e.target.id === "mOut") { ls.del(KEY); el.remove(); D = null; showLogin("已登出。"); }
+    if (e.target.id === "mRe") { e.target.textContent = "下載中…"; try { const nb = await loadBlob(); D = await decryptWith(await importRaw(unb64(ls.get(KEY))), nb); BLOB = nb; el.remove(); start(); } catch(_) { e.target.textContent = "下載失敗（可能沒有網路）"; } }
+  };
+}
+async function checkUpdate(){
+  try {
+    const r = await fetch("meta.json", {cache: "no-store"}); if (!r.ok) return;
+    const m = await r.json();
+    if (m.at && D.generatedAt && m.at > D.generatedAt) {
+      const nb = await loadBlob();
+      const nd = await decryptWith(await importRaw(unb64(ls.get(KEY))), nb);
+      if (nd.generatedAt > D.generatedAt) { BLOB = nb; D = nd; const h = location.hash; start(); if (location.hash !== h) location.hash = h; }
+    }
+  } catch(_){}
+}
+
+boot();
+})();
+</script>
+</body>
+</html>
